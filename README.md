@@ -91,11 +91,11 @@ This is a game, not a simulator.
 
 ## Use of AI tools
 
-Game concept, mechanics and theme by No Game No Life.
+Game concept, mechanics, research real events and sources and theme by No Game No Life.
 
-Claude (Anthropic LLM) was used to help refine the game design,
-research real events and sources, write the game code (HTML, CSS and JavaScript), and draft
-in-game educational text. Real-data values were checked against the sources listed above.
+Claude (Anthropic LLM) was used to help refine the game design, write the game code (HTML, CSS and JavaScript), and draft
+in-game educational text. 
+Real-data values were checked against the sources listed above.
 
 No NASA logos, flags or mission identifiers are used.
 
