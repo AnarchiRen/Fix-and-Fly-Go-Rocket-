@@ -58,34 +58,35 @@ data analysis, and communications with Earth.
 
 ## Real data and events behind the game 📊
 
-| Game element | Real basis |
-|---|---|
-| Deep-space radiation rises to 1.84 mSv/day | Curiosity RAD instrument, measured inside the cruise vehicle to Mars |
-| Safe zone about 0.7 mSv/day | ISS crews receive roughly 0.4 to 1.0 mSv/day |
-| Basic shell does almost nothing against cosmic rays; polyethylene about 15% better, and 50% better against flares | NASA Science archive, plastic shielding article (2005) |
-| Sunlight strength rises with 1 / distance² | Inverse-square law of solar flux |
-| Earth turns once per day and the Sun about once per 25 days, both west to east, with axial tilts of 23.4° and 7.25° | Standard values for Earth and the Sun’s equatorial rotation. In the game one Earth day lasts 20 seconds, so the Sun turns 25.4 times slower |
-| The Moon orbits Earth counterclockwise once per 27.3 days and always shows Earth the same face | Standard values. In the game its orbit takes 546 seconds (27.3 Earth days of 20 seconds each), and the distance is shrunk to fit the map |
-| Galactic cosmic radiation event | Cosmic rays are too energetic to stop fully; hydrogen-rich plastics shield better than aluminum |
-| Extreme temperature swing event | No air in space means big sun and shade swings; Apollo’s slow “barbecue roll” and multilayer insulation manage it |
-| Earth observer, power failure | Midori-II (ADEOS-II), October 2003 Halloween storms |
-| Comms constellation, drag | Starlink loss, February 2022 geomagnetic storm (38 of 49 satellites) |
-| Data relay, Earth sensor errors | Kodama relay satellite, October 2003 storms |
+| Game element | Real basis | Source |
+|---|---|---|
+| Deep-space radiation rises to about 1.84 mSv/day | Curiosity’s RAD instrument measured about 1.8 mSv/day (1.84 in the detailed data) inside its cruise vehicle on the way to Mars | [1], [2] |
+| Safe zone about 0.7 mSv/day | ISS crews receive roughly 0.65 to 0.73 mSv/day, about 100 mSv per six-month stay | [3], [4] |
+| Basic shell does almost nothing against cosmic rays; polyethylene is about 15% better, and 50% better against flares | NASA research on plastic shielding versus aluminum | [5], [6] |
+| Hydrogen-rich materials shield best; metal can create secondary particles; cosmic rays are stronger when the Sun is quiet; solar particle events cannot be predicted | Review of space radiation research | [3] |
+| Sunlight strength rises with 1 / distance² | Inverse-square law of solar flux (standard physics) | none |
+| Earth turns once per day and the Sun about once per 25 days, both west to east, with tilts of 23.4° and 7.25° | Standard values. In the game one Earth day is 20 seconds | none |
+| The Moon orbits Earth once per 27.3 days and always shows Earth the same face | Standard values. Game orbit is 546 seconds and the distance is shrunk | none |
+| Earth observer: failure in October 2003 during a powerful geomagnetic storm; investigators believe charge buildup and an electrical discharge damaged the solar array connectors | Midori-II (ADEOS-II) | [8], [9], [10] |
+| Comms constellation: February 2022 geomagnetic storm, 38 of 49 new satellites lost | Starlink | [11] |
+| Data relay: temporary shutdown during the October 2003 storms | Kodama relay satellite. The Earth-sensor diagnosis is a game simplification | [9] |
+| Galactic cosmic radiation event; extreme temperature swing event | Cosmic rays are too energetic to stop fully; Apollo’s slow “barbecue roll” and multilayer insulation manage temperature swings | [3], general knowledge |
+| Mission brief, requirements and verification report | NASA mission design process | [12] |
 
-## Sources 📚
+## Sources for references 📚
 
-NASA Design and Develop Science Missions webinar PDF; 
-NASA Technical Reports Server (polyethylene shielding, NTRS 20205002815); https://ntrs.nasa.gov/citations/20205002815;
-NOAA National Weather Service Starlink report;
-NASA Goddard SVS Starlink page;
-JAXA/MEXT Midori-II records;
-IEEE Spectrum, “Extreme Solar Storm Strikes Earth”;
-reporting on the Curiosity RAD results (Science, 2013);
-NASA Science Website;
-NASA Scientific Visualization Studio;
-Star Facts website;
-IEEE Spectrum website;
-NOAA website;
+1. NASA, “Radiation Measured by NASA’s Curiosity on Voyage to Mars Has Implications for Future Human Missions,” release 13-165, 30 May 2013. Search the title on nasa.gov. A copy is at https://www.sciencedaily.com/releases/2013/05/130530145930.htm
+2. D. Hassler, “Space Weather at Mars,” slides hosted by NOAA SWPC, 2016. https://www.swpc.noaa.gov/sites/default/files/images/u33/Hassler_Space_Weather_at_Mars_SWW_talk_29apr16_FINAL.pdf
+3. V. De Micco et al., “Radiation environment in exploration-class space missions and plants’ responses relevant for cultivation in Bioregenerative Life Support Systems,” Frontiers in Plant Science, 2022 (open access). https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2022.1001158/full
+4. Spaceflight Now, “Curiosity measures radiation on the way to Mars,” 30 May 2013 (ISS about 100 mSv per six-month stay). https://spaceflightnow.com/mars/msl/130530rad/
+5. NASA Science@NASA, “Plastic spaceships” article, 2005 (archived). https://webarchive.library.unt.edu/eot2008/20090826113149/http:/science.nasa.gov/headlines/y2005/25aug_plasticspaceships.htm
+6. Lawrence Berkeley National Laboratory, “Polyethylene as a Radiation Shielding Standard in Simulated Cosmic-Ray Environments,” 2006. https://www.osti.gov/biblio/918614
+7. Star facts cross-checked against star-facts.com (used only to check explanations, no text copied). https://www.star-facts.com
+8. JAXA, ADEOS-II “Midori-II” project page. https://www.jaxa.jp/projects/sat/adeos2/index_j.html
+9. S. K. Moore, “Extreme Solar Storm Strikes Earth,” IEEE Spectrum, 1 December 2003. https://spectrum.ieee.org/extreme-solar-storm-strikes-earth
+10. N. Ahmad et al., “Revisiting the Midori-II satellite anomaly: evidence of electrostatic discharge from SPENVIS simulations,” Advances in Space Research, 2026. https://www.sciencedirect.com/science/article/abs/pii/S0273117725014334
+11. T.-W. Fang et al., “Space Weather Environment During the SpaceX Starlink Satellite Loss in February 2022,” Space Weather, 2022 (CC BY 4.0). https://repository.library.noaa.gov/view/noaa/53091
+12. NASA, “Design and Develop Science Missions” webinar, Systems Engineering Series, March 2025. https://www.nasa.gov/wp-content/uploads/2025/04/250323-design-and-develop-science-mission.pdf
 
 ## Sound 🎶
 
