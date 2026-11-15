@@ -31,6 +31,13 @@ repair, survive an unknown solar event, and report your findings to Mission Cont
 Controls: arrows or WASD to fly, X to scan/fix, R repairs hull (+8, $6), F refuels ($5).
 On-screen buttons work on touch devices.
 
+## Educational Value 📚
+
+**It teaches why,** not just right or wrong. Wrong repairs explain the mistake, events give clues instead of answers, and the final report shows which part of your design caused the damage.
+**It rewards trying again.** Failure is part of the loop, and players can redesign and compare builds. There’s no single perfect rocket.
+**It teaches you consequences** Every option needs to be considered for survival. Sometimes long-term option is expensive
+**Facts appear when they’re useful.** A NASA fact shows up right when the matching problem hits.
+
 ## How it follows NASA’s mission design process ☄️
 
 The structure is based on NASA’s *Design and Develop Science Missions* webinar
