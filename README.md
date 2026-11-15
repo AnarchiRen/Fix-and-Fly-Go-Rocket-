@@ -50,8 +50,9 @@ The pilot handles four jobs at once: navigation, spacecraft integrity and repair
 data analysis, and communications with Earth.
 
 ## Real data and events behind the game
-|---|---|
+
 | Game element | Real basis |
+|---|---|
 | Deep-space radiation rises to 1.84 mSv/day | Curiosity RAD instrument, measured inside the cruise vehicle to Mars |
 | Safe zone about 0.7 mSv/day | ISS crews receive roughly 0.4 to 1.0 mSv/day |
 | Basic shell does almost nothing against cosmic rays; polyethylene about 15% better, and 50% better against flares | NASA Science archive, plastic shielding article (2005) |
