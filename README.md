@@ -51,6 +51,7 @@ data analysis, and communications with Earth.
 
 ## Real data and events behind the game
 
+|---|---|
 | Game element | Real basis |
 
 | Deep-space radiation rises to 1.84 mSv/day | Curiosity RAD instrument, measured inside the cruise vehicle to Mars |
