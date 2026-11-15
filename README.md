@@ -72,8 +72,10 @@ Storm Strikes Earth”; reporting on the Curiosity RAD results (Science, 2013).
 
 ## Sound
 
-Sounds for File names: `bgm`, `star`, `mini`, `warning`, `scorch`,
-`thrust`, `win`, `lose`, `click`, `hit`
+Credit for 'star', 'mini', 'scorch','thrust', 'win', 'click', 'hit' by Claude (Anthropic LLM)
+Credit for 'Bgm' sound by JonasBlakewood (Pixabay)
+Credit for 'lose' sound by alphix (Pixabay)
+Credit for 'warning' sound by tithuh (Pixaxbay)
 
 ## What is simplified
 
@@ -91,7 +93,7 @@ This is a game, not a simulator.
 
 Game concept, mechanics and theme by No Game No Life.
 
-Claude (a large language model by Anthropic) was used to help refine the game design,
+Claude (Anthropic LLM) was used to help refine the game design,
 research real events and sources, write the game code (HTML, CSS and JavaScript), and draft
 in-game educational text. Real-data values were checked against the sources listed above.
 
