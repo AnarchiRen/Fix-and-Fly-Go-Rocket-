@@ -1,9 +1,9 @@
-# Fix-and-Fly-Go-Rocket-
+# Fix-and-Fly-Go-Rocket- 🚀
 
 A retro space mission design game made for the NASA Space Apps Challenge 2026
 (challenge: *Space Mission Design Game*).
 
-## Mission and Role
+## Mission and Role 🌟
 You are the pilot of a repair mission. Space weather has damaged three real-world-inspired
 spacecraft. Design a rocket on a budget, fly out, diagnose each spacecraft, choose the right
 repair, survive an unknown solar event, and report your findings to Mission Control.
@@ -11,7 +11,7 @@ repair, survive an unknown solar event, and report your findings to Mission Cont
 **Play:** open `index.html` in any modern browser. No install or internet needed
 (the pixel font falls back to a system font offline).
 
-## How to play
+## How to play 🕹️
 
 1. **Mission brief:** read the need, goals, segments and requirements.
 2. **Design:** choose a body, engine and interior within a $100M budget. Every part has a
@@ -31,7 +31,7 @@ repair, survive an unknown solar event, and report your findings to Mission Cont
 Controls: arrows or WASD to fly, X to scan/fix, R repairs hull (+8, $6), F refuels ($5).
 On-screen buttons work on touch devices.
 
-## How it follows NASA’s mission design process
+## How it follows NASA’s mission design process ☄️
 
 The structure is based on NASA’s *Design and Develop Science Missions* webinar
 (Systems Engineering Series, March 2025): identify need and goals, define the concept,
@@ -49,7 +49,7 @@ define requirements, design, build and verify, implement.
 The pilot handles four jobs at once: navigation, spacecraft integrity and repair,
 data analysis, and communications with Earth.
 
-## Real data and events behind the game
+## Real data and events behind the game 📊
 
 | Game element | Real basis |
 |---|---|
@@ -70,14 +70,14 @@ Server (polyethylene shielding, NTRS 20205002815); NOAA National Weather Service
 NASA Goddard SVS Starlink page; JAXA/MEXT Midori-II records; IEEE Spectrum, “Extreme Solar
 Storm Strikes Earth”; reporting on the Curiosity RAD results (Science, 2013).
 
-## Sound
+## Sound 🎶
 
 Credit for 'star', 'mini', 'scorch','thrust', 'win', 'click', 'hit' by Claude (Anthropic LLM).
 Credit for 'Bgm' sound by JonasBlakewood (Pixabay).
 Credit for 'lose' sound by alphix (Pixabay).
 Credit for 'warning' sound by tithuh (Pixaxbay).
 
-## What is simplified
+## What is simplified 🔎
 
 This is a game, not a simulator.
 
@@ -89,7 +89,7 @@ This is a game, not a simulator.
 - In the real events the spacecraft were lost. In the game they can be repaired.
 - Mission data is embedded in the game. It does not call live NASA services.
 
-## Use of AI tools
+## Use of AI tools 🦾
 
 Game concept, mechanics, research real events and sources and theme by No Game No Life.
 
@@ -99,7 +99,7 @@ Real-data values were checked against the sources listed above.
 
 No NASA logos, flags or mission identifiers are used.
 
-## Future work
+## Future work 🫱🏻‍🫲🏼
 
 - Team mode with four roles (navigator, engineer, scientist, communications).
 - Orbiting spacecraft, inspired by NASA Mission Viz.
@@ -107,6 +107,5 @@ No NASA logos, flags or mission identifiers are used.
 - More scenarios from NASA’s DONKI space weather database.
 - Art, sound and a tutorial.
 
-## License
-
-[Choose a license, for example MIT, and add a LICENSE file.]
+## License 🗒️
+This project is part of NASA's SPACE APP CHALLENGE 2026. For license information you can check on the website above 
