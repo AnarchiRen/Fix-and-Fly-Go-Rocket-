@@ -1,9 +1,9 @@
 # Fix-and-Fly-Go-Rocket-
-# Rocket Keeper
 
 A retro space mission design game made for the NASA Space Apps Challenge 2026
 (challenge: *Space Mission Design Game*).
 
+## Mission and Role
 You are the pilot of a repair mission. Space weather has damaged three real-world-inspired
 spacecraft. Design a rocket on a budget, fly out, diagnose each spacecraft, choose the right
 repair, survive an unknown solar event, and report your findings to Mission Control.
