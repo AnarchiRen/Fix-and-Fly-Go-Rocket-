@@ -72,10 +72,10 @@ Storm Strikes Earth”; reporting on the Curiosity RAD results (Science, 2013).
 
 ## Sound
 
-Credit for 'star', 'mini', 'scorch','thrust', 'win', 'click', 'hit' by Claude (Anthropic LLM)
-Credit for 'Bgm' sound by JonasBlakewood (Pixabay)
-Credit for 'lose' sound by alphix (Pixabay)
-Credit for 'warning' sound by tithuh (Pixaxbay)
+Credit for 'star', 'mini', 'scorch','thrust', 'win', 'click', 'hit' by Claude (Anthropic LLM).
+Credit for 'Bgm' sound by JonasBlakewood (Pixabay).
+Credit for 'lose' sound by alphix (Pixabay).
+Credit for 'warning' sound by tithuh (Pixaxbay).
 
 ## What is simplified
 
