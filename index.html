@@ -32,6 +32,7 @@ canvas{width:100%;height:auto;display:block;background:#05030f;border:2px solid 
 .pad{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.pad .btn{margin:0;padding:12px;flex:1;min-width:70px;touch-action:none;user-select:none}
 .row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:9px}.row .bar{flex:1}.row span{width:90px}
 .hide{display:none}#modal{display:none;position:fixed;inset:0;z-index:20;overflow:auto;background:rgba(18,13,43,.97);padding:calc(14px + env(safe-area-inset-top,0px)) 14px 24px}#mbox{max-width:820px;margin:0 auto}
+.warnb{background:var(--bad);color:#1a1033;padding:8px;text-align:center;margin-bottom:8px;animation:bl 1s steps(2) infinite}@keyframes bl{50%{opacity:.3}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style></head><body><div id="app">
 
@@ -60,7 +61,7 @@ canvas{width:100%;height:auto;display:block;background:#05030f;border:2px solid 
 <button class="btn alt" data-k="l">&#9664; Turn</button><button class="btn" data-k="t">Thrust</button><button class="btn alt" data-k="r">Turn &#9654;</button>
 <button class="btn" data-k="act">Fix (X)</button><button class="btn alt" data-k="rep">Repair $6</button><button class="btn alt" data-k="fuel">Fuel $5</button>
 </div>
-<p>Keys: arrows or WASD to fly, R repairs (+8 hull), F refuels. Small cyan stars give +$3M. Random events pause the game so you can buy upgrades. Map is not to scale.</p>
+<p>Keys: arrows or WASD to fly, R repairs (+8 hull), F refuels. Small cyan stars give +$3M. Random events pause the game so you can buy upgrades. Map is not to scale.</p><button class="btn alt" id="mute">Sound: on</button>
 </section>
 
 <section id="report" class="hide"></section>
@@ -100,6 +101,27 @@ const doseD=d=>d<250?.7:.7+1.14*Math.min(1,(d-250)/1500),fluxS=d=>Math.pow(1000/
 radD=d=>Math.max(0,doseD(d)-.7)*2.1*(1-S.I.g),heatD=d=>Math.max(0,fluxS(d)-S.B.tol)*.9;
 const IMGS={},TEX={};['earth','sun','rocket','satellite_broken','satellite_fixed','star'].forEach(k=>{const i=new Image();i.src='assets/'+k+'.png';IMGS[k]=i});
 function spr(c,k,x,y,w,h){let m=IMGS[k];if(!m){m=IMGS[k]=new Image();m.src='assets/'+k+'.png'}if(m.complete&&m.naturalWidth){c.drawImage(m,x,y,w,h);return 1}return 0}
+let MUTE=false,AC,bgT;const SND={},LPN={};
+function ac(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}return AC}
+function tone(f,d=.1,type='square',v=.04,f2){const A=ac();if(!A)return;const o=A.createOscillator(),g=A.createGain(),t=A.currentTime;o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(A.destination);o.start(t);o.stop(t+d)}
+const FX={star:()=>{tone(988,.08,'square',.05);setTimeout(()=>tone(1319,.2,'square',.05),80)},mini:()=>tone(1568,.07,'triangle',.04),
+ warning:()=>{[0,1,2].forEach(i=>setTimeout(()=>{tone(880,.18,'sawtooth',.06);setTimeout(()=>tone(660,.18,'sawtooth',.06),190)},i*400))},
+ click:()=>tone(660,.05,'square',.04),hit:()=>tone(160,.28,'sawtooth',.09,45),
+ win:()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.25,'square',.05),i*140)),
+ lose:()=>[392,330,262,196].forEach((f,i)=>setTimeout(()=>tone(f,.3,'sawtooth',.05),i*220))};
+function snd(k){let a=SND[k];if(!a){a=SND[k]=new Audio();a.preload='auto';a.dataset.t='mp3';a.onerror=()=>{if(a.dataset.t==='mp3'){a.dataset.t='wav';a.src='assets/'+k+'.wav'}else a.dataset.bad=1};a.src='assets/'+k+'.mp3'}return a}
+['bgm','star','mini','warning','scorch','thrust','win','lose','click','hit'].forEach(snd);
+const aok=a=>a.readyState>=3&&!a.dataset.bad;
+function sfx(k){if(MUTE)return;const a=snd(k);if(aok(a)){const n=a.cloneNode();n.volume=.7;n.play().catch(()=>{});return}try{FX[k]&&FX[k]()}catch(e){}}
+function nl(k,on,vol,fq){const A=LPN[k]||(on?ac():0);if(!A)return;let n=LPN[k];
+ if(!n){const c=ac(),b=c.createBuffer(1,c.sampleRate,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type=k==='thrust'?'lowpass':'bandpass';f.frequency.value=fq;const g=c.createGain();g.gain.value=0;s.connect(f);f.connect(g);g.connect(c.destination);s.start();n=LPN[k]={g,c}}
+ n.g.gain.setTargetAtTime(on?vol:0,n.c.currentTime,.05)}
+function bgmS(on){clearInterval(bgT);bgT=0;if(!on||MUTE)return;let i=0;const N=[110,130.8,164.8,130.8,98,123.5,146.8,123.5];bgT=setInterval(()=>tone(N[i++%8]*2,.35,'triangle',.03),420)}
+function lp(k,on,vol){if(MUTE)on=0;const a=snd(k);
+ if(aok(a)){nl(k,0);if(k==='bgm')bgmS(0);a.loop=true;a.volume=vol||.5;if(on&&a.paused)a.play().catch(()=>{});else if(!on&&!a.paused)a.pause();return}
+ if(k==='bgm')bgmS(on);else nl(k,on,vol,k==='thrust'?400:2500)}
+function audioFrame(){lp('thrust',!!(K.t&&S.fuel>0),.25);const fl=fluxS(Math.hypot(S.x-SUN.x,S.y-SUN.y));lp('scorch',fl>3,Math.min(.45,(fl-3)/10))}
 function tex(k){const m=IMGS[k];if(m&&m.complete&&m.naturalWidth)return m;if(TEX[k])return TEX[k];
  const w=512,h=256,o=document.createElement('canvas');o.width=w;o.height=h;const g=o.getContext('2d'),e=k==='earth';let s=e?7:3;const rnd=()=>(s=s*16807%2147483647)/2147483647;
  g.fillStyle=e?'#2b64d9':'#ffb000';g.fillRect(0,0,w,h);
@@ -135,7 +157,7 @@ function start(){
  S={a:0,x:EARTH.x+70,y:EARTH.y,vx:0,vy:0,hp:100,fuel:t.fuel,fmax:t.fuel,bud:t.left,got:[],t:0,inv:0,
   mi:0,ph:'find',pt:0,wrong:0,evlog:[],fl:0,ep:0,pause:0,mg:0,mini:Array.from({length:30},rm),dmg:{rad:0,heat:0,debris:0,flare:0},B,E,I,m:t.m,
   deb:Array.from({length:12+6*(LV-1)},()=>({x:600+Math.random()*1900,y:Math.random()*H,vx:(Math.random()-.5)*40,vy:(Math.random()-.5)*40,v:Math.floor(Math.random()*3),a:Math.random()*6.3,ra:(Math.random()-.5)*1.6}))};
- seen={};K={};show('flight');last=performance.now();raf=requestAnimationFrame(loop);
+ seen={};K={};show('flight');lp('bgm',1,.3);last=performance.now();raf=requestAnimationFrame(loop);
 }
 let last=0;
 function rm(){let x,y;do{x=80+Math.random()*(W-160);y=80+Math.random()*(H-160)}while(Math.hypot(x-SUN.x,y-SUN.y)<110);return{x,y,g:0,vx:(Math.random()-.5)*30,vy:(Math.random()-.5)*30,a:0,ra:(Math.random()-.5)*2}}
@@ -204,9 +226,9 @@ function repairPick(s){
    else{S.wrong++;if(S.wrong>=2){m.style.display='none';end(false);return}msg='Wrong repair. '+p[2];list.splice(+b.dataset.j,1);render()}})};
  render()}
 function openEvent(q){
- const ev=q.ev,ch={b:-1,e:-1,i:-1},m=$('#modal');S.pause=1;K={};m.style.display='block';
+ const ev=q.ev,ch={b:-1,e:-1,i:-1},m=$('#modal');sfx('warning');S.pause=1;K={};m.style.display='block';
  const render=()=>{const ks=['b','e','i'],cost=ks.reduce((s,k)=>s+(ch[k]<0?0:ev.u[k][ch[k]][1]),0),p=Math.min(.95,ks.reduce((s,k)=>s+(ch[k]<0?0:ev.u[k][ch[k]][2]),0));
-  m.innerHTML=`<div id="mbox"><h1 class="bad">${ev.n}</h1><h2>What happened</h2><p>${ev.why}</p><h2>Clue</h2><p>${ev.clue}</p><p class="ok">Real world: ${ev.fact}</p><p>Budget $${S.bud}M. Pick at most one upgrade per part.</p>`+
+  m.innerHTML=`<div id="mbox"><div class="warnb">!! WARNING !!</div><h1 class="bad">${ev.n}</h1><h2>What happened</h2><p>${ev.why}</p><h2>Clue</h2><p>${ev.clue}</p><p class="ok">Real world: ${ev.fact}</p><p>Budget $${S.bud}M. Pick at most one upgrade per part.</p>`+
   [['b','Body'],['e','Engine'],['i','Interior']].map(([k,l])=>`<h2>${l}</h2><div class="grid">`+ev.u[k].map((o,j)=>`<button class="opt${ch[k]===j?' on':''}" data-k="${k}" data-j="${j}"><b>${o[0]}</b><span>$${o[1]}M</span></button>`).join('')+'</div>').join('')+
   `<div class="sum">Upgrade cost $${cost}M ${cost>S.bud?'<span class="bad">Over budget</span>':''}</div><button class="btn" id="go" ${cost>S.bud?'disabled':''}>Apply and continue</button></div>`;
   m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const k=b.dataset.k,j=+b.dataset.j;ch[k]=ch[k]===j?-1:j;render()});
@@ -217,7 +239,7 @@ function openEvent(q){
 function toast(h,ms){const e=$('#toast');e.innerHTML=h;e.style.display='block';clearTimeout(tt);tt=setTimeout(()=>e.style.display='none',ms||5000)}
 function hit(type,amt,dt){amt*=1+.35*(LV-1);S.hp-=amt*dt;S.dmg[type]+=amt*dt;if(!seen[type]&&amt>.5){seen[type]=1;toast('<b class="bad">'+({rad:'Radiation',heat:'Heat',debris:'Debris',flare:'Solar flare'})[type]+'.</b> '+FACTS[type])}}
 function loop(n){
- const dt=Math.min(.05,(n-last)/1000);last=n;if(S.pause){raf=requestAnimationFrame(loop);return}S.t+=dt;
+ const dt=Math.min(.05,(n-last)/1000);last=n;if(S.pause){lp('thrust',0);lp('scorch',0);raf=requestAnimationFrame(loop);return}S.t+=dt;
  const rot=(K.l?-1:0)+(K.r?1:0);S.a+=rot*3.2*dt;
  const acc=160*S.E.th/(1+S.m/6);
  if(K.t&&S.fuel>0){S.vx+=Math.cos(S.a)*acc*dt;S.vy+=Math.sin(S.a)*acc*dt;S.fuel=Math.max(0,S.fuel-S.E.b*.4*dt)}
@@ -231,9 +253,9 @@ function loop(n){
  if(dS<SUN.r+6){S.dmg.heat+=S.hp;S.hp=0}
  S.inv-=dt;
  S.deb.forEach(d=>{d.a+=d.ra*dt;d.x=(d.x+d.vx*dt+W)%W;d.y=(d.y+d.vy*dt+H)%H;
-  if(S.inv<=0&&Math.hypot(S.x-d.x,S.y-d.y)<22){const a=8*(1+.35*(LV-1))*(1-.6*S.B.s);S.hp-=a;S.dmg.debris+=a;S.inv=1;if(!seen.debris){seen.debris=1;toast('<b class="bad">Debris hit.</b> '+FACTS.debris)}}});
- STARS.forEach(s=>{if(!S.got.includes(s)&&Math.hypot(S.x-s.x,S.y-s.y)<30){S.got.push(s);S.bud+=15;toast('<b class="ok">'+s.n+' collected! +$15M</b><br>'+s.d,6500)}});
- S.mini.forEach(m=>{if(m.g)return;m.x=(m.x+m.vx*dt+W)%W;m.y=(m.y+m.vy*dt+H)%H;m.a+=m.ra*dt;if(Math.hypot(S.x-m.x,S.y-m.y)<22){m.g=1;S.bud+=3;S.mg++}});hud();draw();
+  if(S.inv<=0&&Math.hypot(S.x-d.x,S.y-d.y)<22){const a=8*(1+.35*(LV-1))*(1-.6*S.B.s);S.hp-=a;S.dmg.debris+=a;S.inv=1;sfx('hit');if(!seen.debris){seen.debris=1;toast('<b class="bad">Debris hit.</b> '+FACTS.debris)}}});
+ STARS.forEach(s=>{if(!S.got.includes(s)&&Math.hypot(S.x-s.x,S.y-s.y)<30){S.got.push(s);S.bud+=15;sfx('star');toast('<b class="ok">'+s.n+' collected! +$15M</b><br>'+s.d,6500)}});
+ S.mini.forEach(m=>{if(m.g)return;m.x=(m.x+m.vx*dt+W)%W;m.y=(m.y+m.vy*dt+H)%H;m.a+=m.ra*dt;if(Math.hypot(S.x-m.x,S.y-m.y)<22){m.g=1;S.bud+=3;S.mg++;sfx('mini')}});hud();draw();audioFrame();
  if(S.hp<SAFE||S.mi>=SATS.length){end(S.mi>=SATS.length&&S.hp>=SAFE);return}
  raf=requestAnimationFrame(loop);
 }
@@ -275,7 +297,7 @@ function draw(){
  c.restore();
  const n=S.ph==='send'?EARTH:SATS[S.mi];
  if(n){const a=Math.atan2(n.y-S.y,n.x-S.x);c.save();c.translate(400,250);c.rotate(a);c.fillStyle='#fff27a';c.beginPath();c.moveTo(70,0);c.lineTo(58,-6);c.lineTo(58,6);c.fill();c.restore()}
- if(S.fl>0){c.fillStyle='rgba(255,90,122,.15)';c.fillRect(0,0,800,500)}
+ if(S.fl>0){c.fillStyle='rgba(255,90,122,.15)';c.fillRect(0,0,800,500);c.fillStyle=Math.floor(S.t*3)%2?'#ff5a7a':'#ffb000';c.font='12px monospace';c.fillText('!! WARNING: '+S.ev.n.toUpperCase()+' !!',14,26)}
  const mx=630,my=8,mw=162,mh=100,kx=mw/W,ky=mh/H;
  c.fillStyle='rgba(5,3,15,.85)';c.fillRect(mx,my,mw,mh);c.strokeStyle='#4a3d9a';c.lineWidth=2;c.strokeRect(mx,my,mw,mh);
  const P=(x,y,s,col)=>{c.fillStyle=col;c.fillRect(mx+x*kx-s/2,my+y*ky-s/2,s,s)};
@@ -284,7 +306,7 @@ function draw(){
  SATS.forEach((s,i)=>P(s.x,s.y,6,i<S.mi?'#5ef2b0':i===S.mi&&S.ph!=='send'?'#ff5af0':'#ff5a7a'));P(EARTH.x,EARTH.y,6,'#3d7bff');P(SUN.x,SUN.y,9,'#ffb000');P(S.x,S.y,5,'#ff5a7a');
  c.strokeStyle='#f4ecd8aa';c.lineWidth=1;c.strokeRect(mx+cx*kx,my+cy*ky,800*kx,500*ky);
 }
-function end(win){
+function end(win){lp('thrust',0);lp('scorch',0);lp('bgm',0);sfx(win?'win':'lose');
  cancelAnimationFrame(raf);const d=S.dmg,tD=d.rad+d.heat+d.debris+d.flare||1,top=Object.keys(d).sort((a,b)=>d[b]-d[a])[0];
  const adv={rad:'Radiation did the most damage. A stronger interior shield, like polyethylene or a water wall, would help.',
  heat:'Heat did the most damage. A steel or titanium body tolerates it far better, or stay out of the dashed ring.',
@@ -309,4 +331,6 @@ document.querySelectorAll('.pad .btn').forEach(b=>{const k=b.dataset.k;
  if(k==='rep'||k==='fuel'||k==='act'){b.onclick=()=>act(k);return}
  b.onpointerdown=e=>{K[k]=1;e.preventDefault()};['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>K[k]=0))});
 $('#begin').onclick=()=>show('design');$('#launch').onclick=start;design();
+document.addEventListener('click',e=>{if(e.target.closest('.opt,.btn:not([data-k=l]):not([data-k=t]):not([data-k=r])'))sfx('click')});
+$('#mute').onclick=()=>{MUTE=!MUTE;$('#mute').textContent='Sound: '+(MUTE?'off':'on');if(MUTE){lp('bgm',0);lp('thrust',0);lp('scorch',0)}else lp('bgm',1,.3)};
 </script></body></html>
