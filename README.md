@@ -65,10 +65,20 @@ data analysis, and communications with Earth.
 | Comms constellation, drag | Starlink loss, February 2022 geomagnetic storm (38 of 49 satellites) |
 | Data relay, Earth sensor errors | Kodama relay satellite, October 2003 storms |
 
-Sources consulted: NASA Design and Develop Science Missions webinar PDF; NASA Technical Reports
-Server (polyethylene shielding, NTRS 20205002815); NOAA National Weather Service Starlink report;
-NASA Goddard SVS Starlink page; JAXA/MEXT Midori-II records; IEEE Spectrum, “Extreme Solar
-Storm Strikes Earth”; reporting on the Curiosity RAD results (Science, 2013).
+## Sources 📚
+
+NASA Design and Develop Science Missions webinar PDF; 
+NASA Technical Reports Server (polyethylene shielding, NTRS 20205002815); https://ntrs.nasa.gov/citations/20205002815
+NOAA National Weather Service Starlink report;
+NASA Goddard SVS Starlink page;
+JAXA/MEXT Midori-II records;
+IEEE Spectrum, “Extreme Solar Storm Strikes Earth”.
+reporting on the Curiosity RAD results (Science, 2013).
+NASA Science Website
+NASA Scientific Visualization STudio
+Star Facts website
+IEEE Spectrum website
+NOAA website
 
 ## Sound 🎶
 
