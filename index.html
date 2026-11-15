@@ -1,1 +1,312 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fix and Fly: Go Rocket!</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#120d2b;--panel:#1d1647;--line:#4a3d9a;--ink:#f4ecd8;--dim:#a99fd6;--amber:#ffb000;--bad:#ff5a7a;--ok:#5ef2b0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:11px/1.7 "Press Start 2P",ui-monospace,Menlo,monospace}
+#app{max-width:820px;margin:0 auto;padding:14px}
+h1{font-size:18px;margin:6px 0 4px;color:var(--amber)}h2{font-size:12px;margin:18px 0 8px;color:var(--amber)}
+p{margin:6px 0;color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;background:var(--panel);border:2px solid var(--line);padding:10px;display:block}
+.opt:focus-visible{outline:2px solid var(--amber)}
+.opt.on{border-color:var(--amber);background:#2a2060}
+.opt b{display:block;color:var(--ink)}.opt span{display:block;color:var(--amber);margin:4px 0}.opt em{font-style:normal;color:var(--dim);font-size:9px;line-height:1.6}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;background:var(--amber);color:#1a1033;padding:12px 16px;margin-top:12px;display:inline-block;text-align:center}
+.btn:disabled{opacity:.4;cursor:not-allowed}.btn:focus-visible{outline:2px solid var(--ink)}
+.btn.alt{background:var(--panel);color:var(--ink);border:2px solid var(--line)}
+.sum{background:var(--panel);border:2px solid var(--line);padding:10px;margin-top:12px}
+.bad{color:var(--bad)}.ok{color:var(--ok)}
+.hud{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px;font-size:9px}
+.bar{height:12px;background:#000;border:2px solid var(--line);position:relative}
+.bar i{display:block;height:100%;background:var(--ok);width:100%}
+.bar u{position:absolute;left:25%;top:-2px;bottom:-2px;border-left:2px solid var(--bad)}
+.stage{position:relative}
+canvas{width:100%;height:auto;display:block;background:#05030f;border:2px solid var(--line);image-rendering:pixelated}
+#toast{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(18,13,43,.92);border:2px solid var(--amber);padding:8px;font-size:9px;display:none}
+.pad{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.pad .btn{margin:0;padding:12px;flex:1;min-width:70px;touch-action:none;user-select:none}
+.row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:9px}.row .bar{flex:1}.row span{width:90px}
+.hide{display:none}#modal{display:none;position:fixed;inset:0;z-index:20;overflow:auto;background:rgba(18,13,43,.97);padding:calc(14px + env(safe-area-inset-top,0px)) 14px 24px}#mbox{max-width:820px;margin:0 auto}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body><div id="app">
 
+<section id="brief"><h1>MISSION BRIEF</h1><h2>Need</h2><p>Space weather damages real spacecraft. Mission Control needs each failure diagnosed, repaired and reported so future missions survive.</p><h2>Goals</h2><p>1. Reach each damaged spacecraft. 2. Diagnose and repair it. 3. Report the findings to Earth.</p><h2>Mission segments</h2><p>Launch: your rocket and its parts. Space: your rocket and the damaged spacecraft. Ground: Mission Control, the Earth safe zone. User: the scientists who use your findings.</p><h2>Requirements</h2><p>R1 Hull stays above 25%. R2 All 3 spacecraft repaired. R3 All findings transmitted to Earth. R4 At most 1 wrong repair. Each one is checked in your final report.</p><p>Process based on NASA’s Design and Develop Science Missions webinar (Systems Engineering Series, March 2025).</p><button class="btn" id="begin">Begin design</button></section>
+<section id="design" class="hide">
+<h1>Fix and Fly: Go Rocket!</h1>
+<p>Mission Control sends you to repair three spacecraft damaged by real space weather. Build your rocket, find each one, read its data, repair it, and report to Earth. Collect stars on the way to fund upgrades. Keep hull health above the red safety line.</p>
+<h2>Body</h2><div class="grid" id="opts-b"></div>
+<h2>Engine</h2><div class="grid" id="opts-e"></div>
+<h2>Interior</h2><div class="grid" id="opts-i"></div>
+<div class="sum" id="sum"></div>
+<button class="btn" id="launch">Launch mission</button>
+<p>Concept and game design by No Game No Life team. Code written with AI assistance (Claude).</p>
+</section>
+
+<section id="flight" class="hide">
+<div class="hud">
+<div>Hull <b id="hv"></b><div class="bar"><i id="hb"></i><u></u></div></div>
+<div>Fuel <b id="fv"></b><div class="bar"><i id="fb" style="background:var(--amber)"></i></div></div>
+<div>Budget <b id="bv"></b><br>Stars <b id="sv"></b>/8 · Mini <b id="mv"></b></div>
+<div>Radiation <b id="rv"></b><br>Sunlight <b id="tv"></b></div>
+<div style="grid-column:1/-1"><b id="mo"></b><div class="bar"><i id="pg" style="width:0;background:var(--amber)"></i></div></div>
+</div>
+<div class="stage"><canvas id="cv" width="800" height="500"></canvas><div id="toast"></div></div>
+<div class="pad">
+<button class="btn alt" data-k="l">&#9664; Turn</button><button class="btn" data-k="t">Thrust</button><button class="btn alt" data-k="r">Turn &#9654;</button>
+<button class="btn" data-k="act">Fix (X)</button><button class="btn alt" data-k="rep">Repair $6</button><button class="btn alt" data-k="fuel">Fuel $5</button>
+</div>
+<p>Keys: arrows or WASD to fly, R repairs (+8 hull), F refuels. Small cyan stars give +$3M. Random events pause the game so you can buy upgrades. Map is not to scale.</p>
+</section>
+
+<section id="report" class="hide"></section>
+<div id="modal"></div>
+</div>
+<script>
+const $=s=>document.querySelector(s),SAFE=25;let BUDGET=100,LV=1;
+const BODY=[
+{n:'Aluminum alloy',c:10,m:2,h:.25,tol:3,s:.4,t:'Cheap and light. Weak against heat and impacts.'},
+{n:'Stainless steel',c:15,m:5,h:.6,tol:5,s:.6,t:'Handles heat well, but heavy.'},
+{n:'Titanium',c:30,m:3,h:.75,tol:6,s:.8,t:'Strong and heat resistant. Expensive.'},
+{n:'Carbon composite',c:35,m:1.5,h:.35,tol:2,s:.75,t:'Very light and strong, but heat sensitive.'}];
+const ENG=[
+{n:'Chemical',c:15,m:2,th:1,f:60,b:10,t:'Strong thrust, burns fuel fast.'},
+{n:'Ion electric',c:25,m:1,th:.35,f:140,b:4,t:'Very efficient but slow to accelerate.'},
+{n:'Nuclear thermal',c:45,m:4,th:.7,f:110,b:6,t:'Efficient and powerful. NASA has not flown one with crew.'}];
+const INT=[
+{n:'Basic shell',c:5,m:1,r:.1,g:.02,t:'Like an aluminum hull: does almost nothing against cosmic rays.'},
+{n:'Polyethylene',c:15,m:2,r:.5,g:.15,t:'Hydrogen-rich plastic. NASA found it about 15% better than aluminum against cosmic rays and 50% against flares.'},
+{n:'Water wall',c:25,m:5,r:.7,g:.15,t:'Hydrogen-rich like plastic. Strong against solar storms, but heavy.'}];
+const STARS=[
+{n:'Proxima Centauri',x:700,y:500,d:'4.2 light-years. The closest star to the Sun, a small red dwarf with a planet in its habitable zone.'},
+{n:'Alpha Centauri A',x:800,y:1150,d:'4.4 light-years. A Sun-like star in the nearest star system.'},
+{n:'Barnard’s Star',x:1000,y:300,d:'6 light-years. A red dwarf with one of the fastest apparent motions across our sky.'},
+{n:'Sirius',x:1250,y:640,d:'8.6 light-years. The brightest star in Earth’s night sky, twice as massive as the Sun.'},
+{n:'Tau Ceti',x:1850,y:1250,d:'12 light-years. A Sun-like star that astronomers study for possible planets.'},
+{n:'Vega',x:1900,y:350,d:'25 light-years. A bright young star with a disk of dust around it.'},
+{n:'Polaris',x:2350,y:700,d:'About 430 light-years. The North Star, a pulsating supergiant used for navigation.'},
+{n:'Betelgeuse',x:2400,y:1350,d:'Several hundred light-years. A red supergiant that will one day explode as a supernova.'}];
+const FACTS={rad:'NASA has no light, effective shield against deep-space radiation yet. Plastics and water help, but add mass.',
+heat:'Parker Solar Probe survives the Sun’s heat with a heavy carbon shield, and never comes this close. No crewed craft could.',
+debris:'Tiny rocks hit spacecraft at high speed. Stronger hulls resist them but weigh more.',
+flare:'NASA cannot yet reliably predict solar flares, so crews must be protected before they happen.'};
+const EARTH={x:300,y:800,r:40},SUN={x:1300,y:800,r:70},W=2600,H=1600;
+const MOON={d:110,r:11,per:546};
+const doseD=d=>d<250?.7:.7+1.14*Math.min(1,(d-250)/1500),fluxS=d=>Math.pow(1000/Math.max(d,60),2),
+radD=d=>Math.max(0,doseD(d)-.7)*2.1*(1-S.I.g),heatD=d=>Math.max(0,fluxS(d)-S.B.tol)*.9;
+const IMGS={},TEX={};['earth','sun','rocket','satellite_broken','satellite_fixed','star'].forEach(k=>{const i=new Image();i.src='assets/'+k+'.png';IMGS[k]=i});
+function spr(c,k,x,y,w,h){let m=IMGS[k];if(!m){m=IMGS[k]=new Image();m.src='assets/'+k+'.png'}if(m.complete&&m.naturalWidth){c.drawImage(m,x,y,w,h);return 1}return 0}
+function tex(k){const m=IMGS[k];if(m&&m.complete&&m.naturalWidth)return m;if(TEX[k])return TEX[k];
+ const w=512,h=256,o=document.createElement('canvas');o.width=w;o.height=h;const g=o.getContext('2d'),e=k==='earth';let s=e?7:3;const rnd=()=>(s=s*16807%2147483647)/2147483647;
+ g.fillStyle=e?'#2b64d9':'#ffb000';g.fillRect(0,0,w,h);
+ for(let i=0;i<(e?26:40);i++){const x=rnd()*w,y=(.15+.7*rnd())*h,rx=e?18+rnd()*40:5+rnd()*10,ry=rx*(.5+rnd()*.5);g.fillStyle=e?'#3fa34d':'#c2410c';for(const dx of[-w,0,w]){g.beginPath();g.ellipse(x+dx,y,rx,ry,0,0,7);g.fill()}}
+ if(e){g.fillStyle='#f4ecd8';g.fillRect(0,0,w,10);g.fillRect(0,h-10,w,10)}
+ return TEX[k]=o}
+function globe(c,x,y,r,t,per,tilt,shade){
+ const iw=t.naturalWidth||t.width,ih=t.naturalHeight||t.height,rot=S.t/per%1;
+ c.save();c.translate(x,y);c.rotate(tilt);
+ if(iw/ih<1.4){c.save();c.rotate(-rot*6.2832);c.drawImage(t,-r,-r,r*2,r*2);c.restore()}
+ else{c.beginPath();c.arc(0,0,r,0,7);c.clip();
+  for(let px=-r;px<r;px+=2){const xc=px+1,s=Math.max(-.99,Math.min(.99,xc/r)),u=((Math.asin(s)/6.2832-rot)%1+1)%1,
+   sw=Math.min(iw/8,Math.max(1,iw/(3.1416*r)/Math.sqrt(1-s*s))),sx=Math.min(u*iw,iw-sw),ch=2*Math.sqrt(r*r-xc*xc);
+   c.drawImage(t,sx,0,sw,ih,px,-ch/2,2.5,ch)}}
+ c.beginPath();c.arc(0,0,r,0,7);c.clip();
+ const g=c.createRadialGradient(r*.3,0,r*.1,0,0,r);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,shade);c.fillStyle=g;c.fillRect(-r,-r,r*2,r*2);c.restore()}
+let sel={b:0,e:0,i:0},S,raf,K={},seen={},tt;
+const part=()=>({B:BODY[sel.b],E:ENG[sel.e],I:INT[sel.i]});
+const tot=()=>{const{B,E,I}=part();const c=B.c+E.c+I.c,m=B.m+E.m+I.m;return{c,m,fuel:E.f*1.7*(1.3-m/20),left:BUDGET-c}};
+function design(){
+ [['b',BODY],['e',ENG],['i',INT]].forEach(([k,a])=>{const box=$('#opts-'+k);box.innerHTML='';
+  a.forEach((o,i)=>{const b=document.createElement('button');b.className='opt'+(sel[k]===i?' on':'');
+   b.innerHTML=`<b>${o.n}</b><span>$${o.c}M · ${o.m} t</span><em>${o.t}</em>`;b.onclick=()=>{sel[k]=i;design()};box.appendChild(b)})});
+ const{B,E,I}=part(),t=tot();
+ $('#sum').innerHTML=`Cost <b class="${t.left<0?'bad':'ok'}">$${t.c}M</b> of $${BUDGET}M · Left $${t.left}M<br>Mass ${t.m} t · Fuel ${Math.round(t.fuel)}<br>Heat limit ${B.tol}x Earth sunlight · Hull strength ${Math.round(B.s*100)}% · Cosmic-ray cut ${Math.round(I.g*100)}% · Storm shelter ${Math.round(I.r*60)}%`
+ +(t.left<0?'<br><span class="bad">Over budget. Pick cheaper parts.</span>':'');
+ $('#launch').disabled=t.left<0;
+}
+function show(id){['brief','design','flight','report'].forEach(x=>$('#'+x).classList.toggle('hide',x!==id))}
+const sdots=Array.from({length:260},()=>[Math.random()*W,Math.random()*H,Math.random()<.2?2:1]);
+function start(){
+ const{B,E,I}=part(),t=tot();
+ S={a:0,x:EARTH.x+70,y:EARTH.y,vx:0,vy:0,hp:100,fuel:t.fuel,fmax:t.fuel,bud:t.left,got:[],t:0,inv:0,
+  mi:0,ph:'find',pt:0,wrong:0,evlog:[],fl:0,ep:0,pause:0,mg:0,mini:Array.from({length:30},rm),dmg:{rad:0,heat:0,debris:0,flare:0},B,E,I,m:t.m,
+  deb:Array.from({length:12+6*(LV-1)},()=>({x:600+Math.random()*1900,y:Math.random()*H,vx:(Math.random()-.5)*40,vy:(Math.random()-.5)*40,v:Math.floor(Math.random()*3),a:Math.random()*6.3,ra:(Math.random()-.5)*1.6}))};
+ seen={};K={};show('flight');last=performance.now();raf=requestAnimationFrame(loop);
+}
+let last=0;
+function rm(){let x,y;do{x=80+Math.random()*(W-160);y=80+Math.random()*(H-160)}while(Math.hypot(x-SUN.x,y-SUN.y)<110);return{x,y,g:0,vx:(Math.random()-.5)*30,vy:(Math.random()-.5)*30,a:0,ra:(Math.random()-.5)*2}}
+const EVT=[
+{n:'Solar flare',dmg:5,dur:9,why:'The Sun’s twisted magnetic field snapped and threw out a burst of charged particles.',
+clue:'Charged particles are stopped by hydrogen-rich material like plastic, and a magnetic field can bend them. Metal plating alone does little. Crew need a protected core, and a quick burn can add distance from the source.',
+fact:'NASA cannot yet reliably predict solar flares, so crews must be protected before they happen.',
+u:{b:[['Magnetic deflector ring',14,.3],['Thicker steel plating',10,.08]],e:[['Escape-burn tuning',8,.15],['Engine cooling fins',8,0]],i:[['Polyethylene storm shelter',12,.55],['Extra seat padding',6,0]]}},
+{n:'Comet dust storm',dmg:6,dur:8,why:'Your path crossed the dusty trail of a comet. Tiny grains are hitting the hull at tremendous speed.',
+clue:'Fast grains are best shattered by a thin outer layer spaced away from the main hull. Steering out of the stream also helps. Radiation shielding is not the problem here.',
+fact:'The International Space Station uses layered Whipple shields to survive micrometeoroid strikes.',
+u:{b:[['Whipple shield (spaced outer layer)',16,.55],['Extra radiation paint',6,0]],e:[['Evasive thrusters',10,.3],['Bigger fuel tank',8,0]],i:[['Padded crew bunks',6,.1],['Water-wall liner',14,.05]]}},
+{n:'Solar wind surge',dmg:3,dur:10,push:1,why:'A fast stream of solar wind is dragging your rocket toward the Sun and heating its surface.',
+clue:'Surface heat is reflected by a ceramic coating, not absorbed by dark paint. Escaping the sunward push takes raw thrust, which an efficiency tune-up does not give.',
+fact:'Solar wind is hard to forecast. Parker Solar Probe is flying through the Sun’s corona to learn how it works.',
+u:{b:[['Reflective ceramic coating',14,.4],['Black matte paint',4,0]],e:[['High-thrust booster',16,.45],['Efficiency tune-up',8,0]],i:[['Cooling loop',10,.15],['Insulation foam',6,.05]]}},
+{n:'Galactic cosmic radiation surge',dmg:4,dur:10,why:'Cosmic rays from outside our solar system are streaming through your hull. When the Sun is quiet, more of them reach you.',
+clue:'These particles are too energetic to stop completely. Metal can create showers of secondary particles. Hydrogen-rich material breaks them up best, and less time in the beam means less dose.',
+fact:'NASA found that plastics like polyethylene shield cosmic rays better than aluminum, but no light shield stops them fully.',
+u:{b:[['Hydrogen-rich composite panel',14,.25],['Thicker steel hull',10,0]],e:[['Fast transit burn',10,.2],['Efficiency tune-up',6,0]],i:[['Polyethylene liner layer',12,.4],['Extra aluminum plating',6,0]]}},
+{n:'Extreme temperature swings',dmg:5,dur:9,why:'Your rocket is swinging between blazing sunlight and deep shadow. The materials expand and shrink, and parts begin to crack.',
+clue:'Space has no air to even out the heat, so the sunny side bakes while the shaded side freezes. Insulation blankets slow the swing, and slowly rolling the craft spreads the heat evenly.',
+fact:'Apollo spacecraft used a slow “barbecue roll” to even out temperatures, and most spacecraft wear multilayer insulation.',
+u:{b:[['Multi-layer insulation blankets',14,.4],['Black matte paint',4,0]],e:[['Slow barbecue-roll rotation',8,.3],['Extra boost',8,0]],i:[['Heater and radiator loop',12,.25],['Extra seat padding',4,0]]}}];
+const SATS=[
+{n:'Earth observer',img:'midori_ii',x:900,y:950,e:0,sub:'Power system',parts:[['Replace the solar array power line',1],['Reboot the onboard computer',0,'The computer was fine. The readings show a sudden power loss.'],['Recalibrate the Earth sensor',0,'Pointing was normal. The problem is the power output.']],fix:'Replace the damaged power line from the solar array',
+tel:['Solar array output: 6 kW to 1 kW in minutes','Magnetic field: strongly disturbed','Radiation: energetic particle storm'],
+why:'Real case: in October 2003 Japan’s Midori-II lost most of its solar power within minutes. Engineers traced the fault to the power line between the solar cells and the satellite body.',
+ex:{n:'Halloween storm, October 2003',why:'A huge flare and coronal mass ejection filled space with energetic particles while you work.'}},
+{n:'Comms constellation',img:'starlink',x:1750,y:420,e:2,sub:'Orbit control',parts:[['Fire the thrusters to climb to a higher orbit',1],['Replace the solar panels',0,'Power was normal. The problem is drag and falling altitude.'],['Reset the radio transmitter',0,'Communication was fine. The spacecraft is stuck in safe mode and sinking.']],fix:'Fire the thrusters to climb out of the dense air',
+tel:['Altitude: low and falling','Drag: up to 50% above normal','Mode: stuck in safe mode, cannot raise orbit'],
+why:'Real case: in February 2022 a minor geomagnetic storm heated the upper atmosphere, raised drag, and 38 of 49 new Starlink satellites were lost.',
+ex:{n:'Geomagnetic storm, February 2022',dmg:2,tg:EARTH,why:'The storm swelled the upper atmosphere. Drag is pulling your rocket back toward Earth.',
+clue:'Drag pulls you toward Earth. A smooth shape cuts it, and fighting it takes raw thrust. Efficiency alone will not save you.',
+fact:'NOAA rated the 2022 storm as minor, yet it raised drag enough to doom most of a satellite batch.',
+u:{b:[['Streamlined fairing',14,.4],['Heavy armor plating',8,0]],e:[['High-thrust booster',16,.45],['Efficiency tune-up',8,0]],i:[['Autopilot drag compensation',10,.15],['Extra seat padding',4,0]]}}},
+{n:'Data relay',img:'kodama',x:2250,y:1250,e:1,sub:'Attitude control (Earth sensor)',parts:[['Recalibrate the Earth sensor',1],['Replace the solar array power line',0,'Power was normal. The sensor is giving bad signals.'],['Fire the thrusters to climb higher',0,'Altitude was fine. The pointing is off.']],fix:'Reset and recalibrate the Earth sensor',
+tel:['Earth sensor signal: abnormal','Pointing: drifting off target','Radiation: particle burst'],
+why:'Real case: during the 2003 storms the Kodama relay satellite had Earth sensor signal errors and a temporary shutdown.',
+ex:{n:'Particle burst, October 2003',dmg:4,why:'Energetic particles are charging your hull and confusing your electronics.',
+clue:'Charge builds up on surfaces and must be bled away safely. Plastic shelters protect the crew from the particles themselves.',
+fact:'Spacecraft charging causes a large share of recorded satellite anomalies.',
+u:{b:[['Grounded conductive coating',12,.35],['Extra paint layer',4,0]],e:[['Safe-mode quick burn',8,.15],['Engine cooling fins',6,0]],i:[['Polyethylene storm shelter',12,.5],['Seat padding',4,0]]}}}];
+function missionStep(dt){
+ const s=SATS[S.mi];if(!s)return;
+ const d=Math.hypot(S.x-s.x,S.y-s.y),dE=Math.hypot(S.x-EARTH.x,S.y-EARTH.y);
+ if(dE<260){if(S.hp<100)S.hp=Math.min(100,S.hp+10*dt);if(S.fuel<S.fmax)S.fuel=Math.min(S.fmax,S.fuel+8*dt)}
+ const tr=(k,ok,ix)=>{if(S['d'+k])return;if(ok&&dE>260&&S.fl<=0&&!S.pause){S['t'+k]=(S['t'+k]||0)+dt;if(S['t'+k]>6){S['d'+k]=1;openEvent({ev:EVT[ix]})}}};
+ tr(1,S.mi===1&&S.ph==='find',3);tr(2,S.mi===2&&S.ph==='send',4);
+ if(S.ph==='find'){if(d<70){S.ph='scan';S.pt=0;toast('Spacecraft found. Collecting readings. Stay close.',2500)}}
+ else if(S.ph==='scan'){if(d>90){S.ph='find';S.pt=0}else{S.pt+=dt;if(S.pt>=3){S.ph='ready';S.pt=0;
+  toast('<b class="ok">Data collected: '+s.n+'</b><br>'+s.tel.join('<br>')+'<br><b>Diagnosis: '+s.sub+'.</b> '+s.why+'<br><b>Repair:</b> '+s.fix+'. Press Fix (X).',16000)}}}
+ else if(S.ph==='fix'){if(d<90){S.pt+=dt;if(S.pt>=8){S.fx=(S.fx||0)+1;S.ph='send';S.pt=0;toast('<b class="ok">Repaired!</b> Now fly into the Earth comm zone to report your findings.',5000)}}}
+ else if(S.ph==='send'){if(dE<260){S.pt+=dt;if(S.pt>=4){S.mi++;S.bud+=20;S.ph='find';S.pt=0;toast('<b class="ok">Mission Control received your findings. +$20M</b>',4000)}}else S.pt=0}
+}
+function ver(){const R=[['R1 Hull stays above '+SAFE+'%',S.hp>=SAFE],['R2 All 3 spacecraft repaired',(S.fx||0)>=3],['R3 All findings sent to Earth',S.mi>=3],['R4 At most 1 wrong repair',S.wrong<2]];
+ return R.map(r=>`<div class="row"><span style="width:auto;flex:1">${r[0]}</span><b class="${r[1]?'ok':'bad'}">${r[1]?'MET':'NOT MET'}</b></div>`).join('')}
+function doFix(){const s=SATS[S.mi];
+ if(!s||S.ph!=='ready'||Math.hypot(S.x-s.x,S.y-s.y)>90){toast('Fly next to the spacecraft and finish scanning first.',2500);return}
+ repairPick(s)}
+function repairPick(s){
+ const m=$('#modal'),list=s.parts.slice().sort(()=>Math.random()-.5);let msg='';S.pause=1;K={};m.style.display='block';
+ const render=()=>{m.innerHTML=`<div id="mbox"><h1>Choose the repair</h1><p>Diagnosis: ${s.sub}. Wrong repairs: ${S.wrong}/2. A second wrong repair fails the mission.</p>${msg?'<p class="bad">'+msg+'</p>':''}<div class="grid">`+list.map((p,j)=>`<button class="opt" data-j="${j}"><b>${p[0]}</b></button>`).join('')+'</div></div>';
+  m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const p=list[+b.dataset.j];
+   if(p[1]){m.style.display='none';S.pause=0;last=performance.now();S.ph='fix';S.pt=0;openEvent({ev:Object.assign({},EVT[s.e],s.ex)})}
+   else{S.wrong++;if(S.wrong>=2){m.style.display='none';end(false);return}msg='Wrong repair. '+p[2];list.splice(+b.dataset.j,1);render()}})};
+ render()}
+function openEvent(q){
+ const ev=q.ev,ch={b:-1,e:-1,i:-1},m=$('#modal');S.pause=1;K={};m.style.display='block';
+ const render=()=>{const ks=['b','e','i'],cost=ks.reduce((s,k)=>s+(ch[k]<0?0:ev.u[k][ch[k]][1]),0),p=Math.min(.95,ks.reduce((s,k)=>s+(ch[k]<0?0:ev.u[k][ch[k]][2]),0));
+  m.innerHTML=`<div id="mbox"><h1 class="bad">${ev.n}</h1><h2>What happened</h2><p>${ev.why}</p><h2>Clue</h2><p>${ev.clue}</p><p class="ok">Real world: ${ev.fact}</p><p>Budget $${S.bud}M. Pick at most one upgrade per part.</p>`+
+  [['b','Body'],['e','Engine'],['i','Interior']].map(([k,l])=>`<h2>${l}</h2><div class="grid">`+ev.u[k].map((o,j)=>`<button class="opt${ch[k]===j?' on':''}" data-k="${k}" data-j="${j}"><b>${o[0]}</b><span>$${o[1]}M</span></button>`).join('')+'</div>').join('')+
+  `<div class="sum">Upgrade cost $${cost}M ${cost>S.bud?'<span class="bad">Over budget</span>':''}</div><button class="btn" id="go" ${cost>S.bud?'disabled':''}>Apply and continue</button></div>`;
+  m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const k=b.dataset.k,j=+b.dataset.j;ch[k]=ch[k]===j?-1:j;render()});
+  $('#go').onclick=()=>{S.bud-=cost;S.ep=p;S.fl=ev.dur;S.ev=ev;seen.flare=1;S.evlog.push(ev.n+' (protection '+Math.round(p*100)+'%)');m.style.display='none';S.pause=0;last=performance.now();
+   toast('<b class="bad">'+ev.n+' hits for '+ev.dur+' seconds.</b> Your upgrades give '+Math.round(p*100)+'% protection.',5000)}};
+ render();window.scrollTo(0,0);
+}
+function toast(h,ms){const e=$('#toast');e.innerHTML=h;e.style.display='block';clearTimeout(tt);tt=setTimeout(()=>e.style.display='none',ms||5000)}
+function hit(type,amt,dt){amt*=1+.35*(LV-1);S.hp-=amt*dt;S.dmg[type]+=amt*dt;if(!seen[type]&&amt>.5){seen[type]=1;toast('<b class="bad">'+({rad:'Radiation',heat:'Heat',debris:'Debris',flare:'Solar flare'})[type]+'.</b> '+FACTS[type])}}
+function loop(n){
+ const dt=Math.min(.05,(n-last)/1000);last=n;if(S.pause){raf=requestAnimationFrame(loop);return}S.t+=dt;
+ const rot=(K.l?-1:0)+(K.r?1:0);S.a+=rot*3.2*dt;
+ const acc=160*S.E.th/(1+S.m/6);
+ if(K.t&&S.fuel>0){S.vx+=Math.cos(S.a)*acc*dt;S.vy+=Math.sin(S.a)*acc*dt;S.fuel=Math.max(0,S.fuel-S.E.b*.4*dt)}
+ const dr=1-.25*dt;S.vx*=dr;S.vy*=dr;S.x=Math.min(W,Math.max(0,S.x+S.vx*dt));S.y=Math.min(H,Math.max(0,S.y+S.vy*dt));
+ if(S.x<=0||S.x>=W)S.vx*=-.5;if(S.y<=0||S.y>=H)S.vy*=-.5;
+ missionStep(dt);
+ if(S.fl>0){S.fl-=dt;hit('flare',S.ev.dmg*.7*(1-S.ep)*(1-S.I.r*.6),dt);if(S.ev.push){const a=Math.atan2((S.ev.tg||SUN).y-S.y,(S.ev.tg||SUN).x-S.x),f=70*(1-S.ep);S.vx+=Math.cos(a)*f*dt;S.vy+=Math.sin(a)*f*dt}}
+ const dE=Math.hypot(S.x-EARTH.x,S.y-EARTH.y),dS=Math.hypot(S.x-SUN.x,S.y-SUN.y);
+ const rad=radD(dE),heat=heatD(dS),fm=1;
+ hit('rad',rad*fm,dt);hit('heat',heat,dt);
+ if(dS<SUN.r+6){S.dmg.heat+=S.hp;S.hp=0}
+ S.inv-=dt;
+ S.deb.forEach(d=>{d.a+=d.ra*dt;d.x=(d.x+d.vx*dt+W)%W;d.y=(d.y+d.vy*dt+H)%H;
+  if(S.inv<=0&&Math.hypot(S.x-d.x,S.y-d.y)<22){const a=8*(1+.35*(LV-1))*(1-.6*S.B.s);S.hp-=a;S.dmg.debris+=a;S.inv=1;if(!seen.debris){seen.debris=1;toast('<b class="bad">Debris hit.</b> '+FACTS.debris)}}});
+ STARS.forEach(s=>{if(!S.got.includes(s)&&Math.hypot(S.x-s.x,S.y-s.y)<30){S.got.push(s);S.bud+=15;toast('<b class="ok">'+s.n+' collected! +$15M</b><br>'+s.d,6500)}});
+ S.mini.forEach(m=>{if(m.g)return;m.x=(m.x+m.vx*dt+W)%W;m.y=(m.y+m.vy*dt+H)%H;m.a+=m.ra*dt;if(Math.hypot(S.x-m.x,S.y-m.y)<22){m.g=1;S.bud+=3;S.mg++}});hud();draw();
+ if(S.hp<SAFE||S.mi>=SATS.length){end(S.mi>=SATS.length&&S.hp>=SAFE);return}
+ raf=requestAnimationFrame(loop);
+}
+function hud(){
+ const d=Math.hypot(S.x-EARTH.x,S.y-EARTH.y),ds=Math.hypot(S.x-SUN.x,S.y-SUN.y);
+ const rad=radD(d),heat=heatD(ds);
+ $('#hv').textContent=Math.max(0,Math.round(S.hp))+'%';$('#hb').style.width=Math.max(0,S.hp)+'%';$('#hb').style.background=S.hp<SAFE+15?'var(--bad)':'var(--ok)';
+ $('#fv').textContent=Math.round(S.fuel);$('#fb').style.width=S.fuel/S.fmax*100+'%';
+ $('#bv').textContent='$'+S.bud+'M';$('#sv').textContent=S.got.length;$('#mv').textContent=S.mg+'/30';
+ const st=SATS[S.mi],L={find:'Find the '+(st?st.n:''),scan:'Scanning. Stay close.',ready:'Data ready. Press Fix (X)',fix:'Repairing. Stay close.',send:'Fly to Earth to report. The safe zone repairs you'};
+ $('#mo').textContent=st?'Level '+LV+' · Mission '+(S.mi+1)+'/3: '+L[S.ph]+' · Wrong repairs '+S.wrong+'/2':'Done';
+ $('#pg').style.width=(S.ph==='scan'?S.pt/3:S.ph==='fix'?S.pt/8:S.ph==='send'?S.pt/4:0)*100+'%';
+ $('#rv').textContent=doseD(d).toFixed(2)+' mSv/day';$('#tv').textContent=fluxS(ds).toFixed(1)+'x sun';
+}
+function draw(){
+ const c=$('#cv').getContext('2d'),cx=Math.min(W-400,Math.max(0,S.x-400)),cy=Math.min(H-250,Math.max(0,S.y-250));
+ c.fillStyle='#05030f';c.fillRect(0,0,800,500);c.save();c.translate(-cx,-cy);
+ c.fillStyle='#8f86c9';sdots.forEach(s=>c.fillRect(s[0],s[1],s[2],s[2]));
+ c.strokeStyle='#ff5a7a55';c.setLineDash([6,8]);c.beginPath();c.arc(SUN.x,SUN.y,400,0,7);c.stroke();c.setLineDash([]);
+ globe(c,SUN.x,SUN.y,SUN.r,tex('sun'),508,.1265,'rgba(150,40,0,.55)');
+ globe(c,EARTH.x,EARTH.y,EARTH.r,tex('earth'),20,.408,'rgba(0,0,40,.65)');
+ {const ma=1-S.t/MOON.per*6.2832,mx=EARTH.x+Math.cos(ma)*MOON.d,my=EARTH.y+Math.sin(ma)*MOON.d;
+  c.lineWidth=1;c.strokeStyle='rgba(255,255,255,.12)';c.beginPath();c.arc(EARTH.x,EARTH.y,MOON.d,0,7);c.stroke();
+  c.save();c.translate(mx,my);c.rotate(ma);
+  if(!spr(c,'moon',-MOON.r,-MOON.r,MOON.r*2,MOON.r*2)){c.fillStyle='#b9b4c9';c.beginPath();c.arc(0,0,MOON.r,0,7);c.fill();c.fillStyle='#7f7a92';c.fillRect(-MOON.r+2,-3,5,5);c.fillRect(2,-6,4,4)}
+  c.restore();c.fillStyle='#f4ecd8';c.fillText('MOON',mx-14,my+MOON.r+12)}
+ c.fillStyle='#f4ecd8';c.font='10px monospace';c.fillText('EARTH',EARTH.x-20,EARTH.y+58);c.fillText('SUN',SUN.x-12,SUN.y+90);
+ c.strokeStyle='#8f86c9';S.deb.forEach(d=>{c.save();c.translate(d.x,d.y);c.rotate(d.a);if(!spr(c,'debris_'+(d.v+1),-14,-14,28,28))c.strokeRect(-8,-8,16,16);c.restore()});
+ STARS.forEach((s,i)=>{const g=S.got.includes(s),x=s.x+Math.sin(S.t*.6+i)*6,y=s.y+Math.cos(S.t*.5+i*1.3)*5,tw=.65+.35*Math.sin(S.t*2.2+i*1.7),k=s.n.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+ c.fillStyle=g?'#5ef2b0':'#fff27a';c.globalAlpha=g?.4:tw;
+ if(!spr(c,k,x-18,y-18,36,36)&&!spr(c,'star',x-16,y-16,32,32)){c.beginPath();c.moveTo(x,y-14);c.lineTo(x+9,y);c.lineTo(x,y+14);c.lineTo(x-9,y);c.fill()}
+ c.globalAlpha=1;c.fillText(s.n,x-30,y+28)});
+ if(1){c.strokeStyle='#5ef2b0';c.setLineDash([8,8]);c.beginPath();c.arc(EARTH.x,EARTH.y,260,0,7);c.stroke();c.setLineDash([])}
+ SATS.forEach((s,i)=>{c.fillStyle=i<S.mi?'#5ef2b0':'#ff5a7a';const sk=i<S.mi?'fixed':'broken';if(!(spr(c,s.img+'_'+sk,s.x-24,s.y-24,48,48)||spr(c,s.img,s.x-24,s.y-24,48,48)||spr(c,'satellite_'+sk,s.x-22,s.y-22,44,44))){c.fillRect(s.x-6,s.y-6,12,12);c.fillRect(s.x-22,s.y-3,12,6);c.fillRect(s.x+10,s.y-3,12,6)}if(i===S.mi){c.fillStyle='#f4ecd8';c.fillText(s.n,s.x-30,s.y+24)}});
+ c.fillStyle='#7df9ff';S.mini.forEach((m,i)=>{if(m.g)return;c.save();c.translate(m.x,m.y);c.rotate(m.a);c.globalAlpha=.7+.3*Math.sin(S.t*3+i);if(!spr(c,'mini_star',-8,-8,16,16)){c.fillRect(-2,-5,4,10);c.fillRect(-5,-2,10,4)}c.restore()});
+ c.translate(S.x,S.y);c.rotate(S.a);c.strokeStyle=S.inv>0&&Math.floor(S.t*10)%2?'#ff5a7a':'#f4ecd8';c.lineWidth=2;
+ if(!spr(c,'rocket',-18,-18,36,36)){c.beginPath();c.moveTo(14,0);c.lineTo(-10,-9);c.lineTo(-6,0);c.lineTo(-10,9);c.closePath();c.stroke()}
+ if(K.t&&S.fuel>0){c.strokeStyle='#ffb000';c.beginPath();c.moveTo(-8,-4);c.lineTo(-20-Math.random()*8,0);c.lineTo(-8,4);c.stroke()}
+ c.restore();
+ const n=S.ph==='send'?EARTH:SATS[S.mi];
+ if(n){const a=Math.atan2(n.y-S.y,n.x-S.x);c.save();c.translate(400,250);c.rotate(a);c.fillStyle='#fff27a';c.beginPath();c.moveTo(70,0);c.lineTo(58,-6);c.lineTo(58,6);c.fill();c.restore()}
+ if(S.fl>0){c.fillStyle='rgba(255,90,122,.15)';c.fillRect(0,0,800,500)}
+ const mx=630,my=8,mw=162,mh=100,kx=mw/W,ky=mh/H;
+ c.fillStyle='rgba(5,3,15,.85)';c.fillRect(mx,my,mw,mh);c.strokeStyle='#4a3d9a';c.lineWidth=2;c.strokeRect(mx,my,mw,mh);
+ const P=(x,y,s,col)=>{c.fillStyle=col;c.fillRect(mx+x*kx-s/2,my+y*ky-s/2,s,s)};
+ S.mini.forEach(m=>{if(!m.g)P(m.x,m.y,2,'#7df9ff')});
+ STARS.forEach(s=>{const g=S.got.includes(s);P(s.x,s.y,g?4:7,g?'#5ef2b0':'#fff27a')});
+ SATS.forEach((s,i)=>P(s.x,s.y,6,i<S.mi?'#5ef2b0':i===S.mi&&S.ph!=='send'?'#ff5af0':'#ff5a7a'));P(EARTH.x,EARTH.y,6,'#3d7bff');P(SUN.x,SUN.y,9,'#ffb000');P(S.x,S.y,5,'#ff5a7a');
+ c.strokeStyle='#f4ecd8aa';c.lineWidth=1;c.strokeRect(mx+cx*kx,my+cy*ky,800*kx,500*ky);
+}
+function end(win){
+ cancelAnimationFrame(raf);const d=S.dmg,tD=d.rad+d.heat+d.debris+d.flare||1,top=Object.keys(d).sort((a,b)=>d[b]-d[a])[0];
+ const adv={rad:'Radiation did the most damage. A stronger interior shield, like polyethylene or a water wall, would help.',
+ heat:'Heat did the most damage. A steel or titanium body tolerates it far better, or stay out of the dashed ring.',
+ debris:'Debris did the most damage. A stronger hull, like titanium or composite, would help.',
+ flare:'Random events did the most damage. Read each event’s clue and pick the upgrades that match its cause.'}[top];
+ const score=S.mi*300+S.got.length*100+S.bud*2+Math.max(0,Math.round(S.hp));
+ const bars=[['Radiation','rad'],['Heat','heat'],['Debris','debris'],['Random events','flare']].map(([l,k])=>`<div class="row"><span>${l}</span><div class="bar"><i style="width:${d[k]/tD*100}%;background:var(--bad)"></i></div>${Math.round(d[k])}</div>`).join('');
+ $('#report').innerHTML=`<h1 class="${win?'ok':'bad'}">${win?'MISSION SUCCESS':'MISSION FAILED'}</h1>
+ <p>${win?'All three spacecraft were repaired and reported to Mission Control.':(S.hp<SAFE?'Hull health fell below the '+SAFE+'% safety level.':S.wrong>=2?'Two wrong repair choices. The spacecraft could not be saved.':'Mission ended.')}</p>
+ <div class="sum">Spacecraft fixed ${S.mi}/3 · Stars ${S.got.length}/8 · Hull ${Math.max(0,Math.round(S.hp))}% · Time ${Math.round(S.t)}s · Budget left $${S.bud}M<br>Score <b class="ok">${score}</b></div>
+ <h2>Verification against mission requirements</h2>${ver()}<h2>What damaged your rocket</h2>${bars}
+ <h2>Why</h2><p>Your build: ${S.B.n}, ${S.E.n}, ${S.I.n}.</p>${S.evlog.length?'<p>Events: '+S.evlog.join('; ')+'.</p>':''}<p>${adv}</p>${S.fuel<=0?'<p>You ran out of fuel. Refuel with F, or choose a more efficient engine.</p>':''}
+ ${win?'<p>Next level: damage is 35% stronger, there is more debris, and your budget is $10M smaller.</p>':''}<button class="btn" id="again">${win?'Start Level '+(LV+1):'Redesign and fly again'}</button>`;
+ show('report');$('#again').onclick=()=>{if(win){LV++;BUDGET=Math.max(60,100-10*(LV-1))}show('design');design()};
+}
+const map={ArrowLeft:'l',a:'l',ArrowRight:'r',d:'r',ArrowUp:'t',w:'t'};
+addEventListener('keydown',e=>{const k=map[e.key];if(k){K[k]=1;e.preventDefault()}
+ if(S&&!$('#flight').classList.contains('hide')){if(e.key==='r')act('rep');if(e.key==='f')act('fuel');if(e.key==='x'||e.key===' ')act('act')}});
+addEventListener('keyup',e=>{const k=map[e.key];if(k)K[k]=0});
+function act(k){if(k==='act')return doFix();if(k==='rep'&&S.bud>=6&&S.hp<100){S.bud-=6;S.hp=Math.min(100,S.hp+8)}if(k==='fuel'&&S.bud>=5&&S.fuel<S.fmax){S.bud-=5;S.fuel=Math.min(S.fmax,S.fuel+25)}}
+document.querySelectorAll('.pad .btn').forEach(b=>{const k=b.dataset.k;
+ if(k==='rep'||k==='fuel'||k==='act'){b.onclick=()=>act(k);return}
+ b.onpointerdown=e=>{K[k]=1;e.preventDefault()};['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>K[k]=0))});
+$('#begin').onclick=()=>show('design');$('#launch').onclick=start;design();
+</script></body></html>
