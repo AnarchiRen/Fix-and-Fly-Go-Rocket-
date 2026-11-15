@@ -163,9 +163,9 @@ let last=0;
 function rm(){let x,y;do{x=80+Math.random()*(W-160);y=80+Math.random()*(H-160)}while(Math.hypot(x-SUN.x,y-SUN.y)<110);return{x,y,g:0,vx:(Math.random()-.5)*30,vy:(Math.random()-.5)*30,a:0,ra:(Math.random()-.5)*2}}
 const EVT=[
 {n:'Solar flare',dmg:5,dur:9,why:'The Sun’s twisted magnetic field snapped and threw out a burst of charged particles.',
-clue:'Charged particles are stopped by hydrogen-rich material like plastic, and a magnetic field can bend them. Metal plating alone does little. Crew need a protected core, and a quick burn can add distance from the source.',
+clue:'Charged particles are stopped by hydrogen-rich material like plastic, and a magnetic field can bend them. Metal plating alone does little. Crew need a protected core, and turning the ship so heavy fuel tanks sit between the Sun and the crew helps.',
 fact:'NASA cannot yet reliably predict solar flares, so crews must be protected before they happen.',
-u:{b:[['Magnetic deflector ring',14,.3],['Thicker steel plating',10,.08]],e:[['Escape-burn tuning',8,.15],['Engine cooling fins',8,0]],i:[['Polyethylene storm shelter',12,.55],['Extra seat padding',6,0]]}},
+u:{b:[['Magnetic deflector ring',14,.3],['Thicker steel plating',10,.08]],e:[['Thruster turn: fuel tanks face the Sun',8,.15],['Engine cooling fins',8,0]],i:[['Polyethylene storm shelter',12,.55],['Extra seat padding',6,0]]}},
 {n:'Comet dust storm',dmg:6,dur:8,why:'Your path crossed the dusty trail of a comet. Tiny grains are hitting the hull at tremendous speed.',
 clue:'Fast grains are best shattered by a thin outer layer spaced away from the main hull. Steering out of the stream also helps. Radiation shielding is not the problem here.',
 fact:'The International Space Station uses layered Whipple shields to survive micrometeoroid strikes.',
@@ -183,23 +183,23 @@ clue:'Space has no air to even out the heat, so the sunny side bakes while the s
 fact:'Apollo spacecraft used a slow “barbecue roll” to even out temperatures, and most spacecraft wear multilayer insulation.',
 u:{b:[['Multi-layer insulation blankets',14,.4],['Black matte paint',4,0]],e:[['Slow barbecue-roll rotation',8,.3],['Extra boost',8,0]],i:[['Heater and radiator loop',12,.25],['Extra seat padding',4,0]]}}];
 const SATS=[
-{n:'Earth observer',img:'midori_ii',x:900,y:950,e:0,sub:'Power system',parts:[['Replace the solar array power line',1],['Reboot the onboard computer',0,'The computer was fine. The readings show a sudden power loss.'],['Recalibrate the Earth sensor',0,'Pointing was normal. The problem is the power output.']],fix:'Replace the damaged power line from the solar array',
-tel:['Solar array output: 6 kW to 1 kW in minutes','Magnetic field: strongly disturbed','Radiation: energetic particle storm'],
-why:'Real case: in October 2003 Japan’s Midori-II lost most of its solar power within minutes. Engineers traced the fault to the power line between the solar cells and the satellite body.',
+{n:'Earth observer',img:'midori_ii',x:900,y:950,e:0,sub:'Power system',parts:[['Repair the solar array connectors',1],['Reboot the onboard computer',0,'The computer was fine. The readings show a sudden power loss.'],['Recalibrate the Earth sensor',0,'Pointing was normal. The problem is the power output.']],fix:'Repair the damaged solar array connectors',
+tel:['Solar array output: dropped sharply','Magnetic field: strongly disturbed','Radiation: energetic particle storm'],
+why:'Real case: Japan’s Midori-II failed in October 2003 during a powerful geomagnetic storm. Investigators believe static charge built up on its surface and an electrical discharge damaged the solar array connectors.',
 ex:{n:'Halloween storm, October 2003',why:'A huge flare and coronal mass ejection filled space with energetic particles while you work.'}},
 {n:'Comms constellation',img:'starlink',x:1750,y:420,e:2,sub:'Orbit control',parts:[['Fire the thrusters to climb to a higher orbit',1],['Replace the solar panels',0,'Power was normal. The problem is drag and falling altitude.'],['Reset the radio transmitter',0,'Communication was fine. The spacecraft is stuck in safe mode and sinking.']],fix:'Fire the thrusters to climb out of the dense air',
-tel:['Altitude: low and falling','Drag: up to 50% above normal','Mode: stuck in safe mode, cannot raise orbit'],
-why:'Real case: in February 2022 a minor geomagnetic storm heated the upper atmosphere, raised drag, and 38 of 49 new Starlink satellites were lost.',
+tel:['Altitude: low and falling','Drag: far above what was planned','Mode: stuck in safe mode, cannot raise orbit'],
+why:'Real case: in February 2022 a geomagnetic storm thickened the upper atmosphere, raised drag, and 38 of 49 new Starlink satellites were lost.',
 ex:{n:'Geomagnetic storm, February 2022',dmg:2,tg:EARTH,why:'The storm swelled the upper atmosphere. Drag is pulling your rocket back toward Earth.',
 clue:'Drag pulls you toward Earth. A smooth shape cuts it, and fighting it takes raw thrust. Efficiency alone will not save you.',
-fact:'NOAA rated the 2022 storm as minor, yet it raised drag enough to doom most of a satellite batch.',
+fact:'In February 2022 a geomagnetic storm thickened the upper atmosphere, and 38 of 49 newly launched Starlink satellites were lost.',
 u:{b:[['Streamlined fairing',14,.4],['Heavy armor plating',8,0]],e:[['High-thrust booster',16,.45],['Efficiency tune-up',8,0]],i:[['Autopilot drag compensation',10,.15],['Extra seat padding',4,0]]}}},
-{n:'Data relay',img:'kodama',x:2250,y:1250,e:1,sub:'Attitude control (Earth sensor)',parts:[['Recalibrate the Earth sensor',1],['Replace the solar array power line',0,'Power was normal. The sensor is giving bad signals.'],['Fire the thrusters to climb higher',0,'Altitude was fine. The pointing is off.']],fix:'Reset and recalibrate the Earth sensor',
-tel:['Earth sensor signal: abnormal','Pointing: drifting off target','Radiation: particle burst'],
-why:'Real case: during the 2003 storms the Kodama relay satellite had Earth sensor signal errors and a temporary shutdown.',
+{n:'Data relay',img:'kodama',x:2250,y:1250,e:1,sub:'Attitude control (Earth sensor)',parts:[['Recalibrate the Earth sensor',1],['Repair the solar array connectors',0,'Power was normal. The sensor is giving bad signals.'],['Fire the thrusters to climb higher',0,'Altitude was fine. The pointing is off.']],fix:'Reset and recalibrate the Earth sensor',
+tel:['System status: shut down temporarily','Pointing: drifting off target','Radiation: particle burst'],
+why:'Real case: during the October 2003 storms Japan’s Kodama relay satellite had a temporary shutdown. The sensor diagnosis here is a game simplification.',
 ex:{n:'Particle burst, October 2003',dmg:4,why:'Energetic particles are charging your hull and confusing your electronics.',
 clue:'Charge builds up on surfaces and must be bled away safely. Plastic shelters protect the crew from the particles themselves.',
-fact:'Spacecraft charging causes a large share of recorded satellite anomalies.',
+fact:'Charge building up on a satellite’s surface is a root cause of many satellite problems.',
 u:{b:[['Grounded conductive coating',12,.35],['Extra paint layer',4,0]],e:[['Safe-mode quick burn',8,.15],['Engine cooling fins',6,0]],i:[['Polyethylene storm shelter',12,.5],['Seat padding',4,0]]}}}];
 function missionStep(dt){
  const s=SATS[S.mi];if(!s)return;
