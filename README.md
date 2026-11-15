@@ -68,17 +68,17 @@ data analysis, and communications with Earth.
 ## Sources 📚
 
 NASA Design and Develop Science Missions webinar PDF; 
-NASA Technical Reports Server (polyethylene shielding, NTRS 20205002815); https://ntrs.nasa.gov/citations/20205002815
+NASA Technical Reports Server (polyethylene shielding, NTRS 20205002815); https://ntrs.nasa.gov/citations/20205002815;
 NOAA National Weather Service Starlink report;
 NASA Goddard SVS Starlink page;
 JAXA/MEXT Midori-II records;
-IEEE Spectrum, “Extreme Solar Storm Strikes Earth”.
-reporting on the Curiosity RAD results (Science, 2013).
-NASA Science Website
-NASA Scientific Visualization STudio
-Star Facts website
-IEEE Spectrum website
-NOAA website
+IEEE Spectrum, “Extreme Solar Storm Strikes Earth”;
+reporting on the Curiosity RAD results (Science, 2013);
+NASA Science Website;
+NASA Scientific Visualization Studio;
+Star Facts website;
+IEEE Spectrum website;
+NOAA website;
 
 ## Sound 🎶
 
